@@ -1,0 +1,16 @@
+# Normalize line endings: LF in the repository for all text files.
+* text=auto eol=lf
+
+# Windows-only scripts must keep CRLF to run correctly.
+*.cmd text eol=crlf
+*.bat text eol=crlf
+
+# Treat binaries (and keystores) as binary so Git never alters them.
+*.jar binary
+*.zip binary
+*.p12 binary
+*.pfx binary
+*.pkcs12 binary
+*.jks binary
+*.bcfks binary
+*.keystore binary

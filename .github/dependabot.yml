@@ -1,0 +1,26 @@
+version: 2
+updates:
+  # Maven dependencies for the email-mtls extension.
+  - package-ecosystem: "maven"
+    directory: "/email-mtls"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "ext:email-mtls"
+    commit-message:
+      prefix: "build(deps)"
+      include: "scope"
+
+  # GitHub Actions used by the workflows.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "github-actions"
+    commit-message:
+      prefix: "ci(deps)"

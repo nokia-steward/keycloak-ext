@@ -1,0 +1,9 @@
+# Code owners for nokia/keycloak-ext
+# Order matters: the last matching pattern takes precedence.
+# Review from the matching code owners is required by the branch ruleset on main.
+
+# Default owners for everything in the repo (shared root files, .github, docs).
+*                       @nokia/keycloak-ext-maintainers
+
+# The email-mtls extension.
+/email-mtls/            @nokia/keycloak-ext-maintainers

@@ -1,0 +1,28 @@
+Nokia keycloak-ext
+Copyright 2026 Nokia
+
+This product is licensed under the Apache License, Version 2.0 (see the LICENSE
+file in the repository root).
+
+This product includes software developed by the Keycloak community
+(https://www.keycloak.org). Keycloak is a trademark of Red Hat, Inc. The
+`email-mtls` extension compiles against Keycloak SPI artifacts (declared with
+Maven `provided` scope) and does not bundle or redistribute Keycloak binaries.
+
+"Keycloak" and the Keycloak logo are trademarks of Red Hat, Inc., used here for
+identification purposes only. This project is not affiliated with or endorsed by
+Red Hat, Inc.
+
+Third-party components used only for building and testing (not redistributed in
+the released JAR):
+
+  - Jakarta Mail API (jakarta.mail-api) - EPL 2.0 / GPL-2.0-with-classpath-exception
+  - Eclipse Angus Mail (org.eclipse.angus:angus-mail) - EPL 2.0 / GPL-2.0-with-classpath-exception
+  - JUnit (junit:junit) - EPL 1.0
+  - Hamcrest (org.hamcrest:hamcrest) - BSD-3-Clause
+  - Mockito (org.mockito:mockito-core) - MIT
+  - GreenMail (com.icegreen:greenmail) - Apache-2.0
+  - Bouncy Castle (org.bouncycastle:bcpkix-jdk18on, bcprov-jdk18on) - MIT-style (Bouncy Castle Licence)
+
+NOTE: Before the first public release, confirm Nokia naming/trademark guidance
+and the exact NOTICE content with the Nokia open-source review (OSI) team.

@@ -1,0 +1,42 @@
+name: DCO
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  dco:
+    name: DCO sign-off check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify Signed-off-by on all PR commits
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          missing=0
+          for sha in $(git rev-list "${BASE_SHA}..${HEAD_SHA}"); do
+            # Allow merge commits (more than one parent) to pass without sign-off.
+            parents=$(git show -s --format='%P' "$sha" | wc -w)
+            if [ "$parents" -gt 1 ]; then
+              continue
+            fi
+            if ! git log -1 --format='%B' "$sha" | grep -qiE '^Signed-off-by: .+ <.+@.+>'; then
+              echo "::error::Commit $sha is missing a 'Signed-off-by' line."
+              git log -1 --format='  %h %s (%an)' "$sha"
+              missing=1
+            fi
+          done
+          if [ "$missing" -ne 0 ]; then
+            echo "DCO check failed. Sign off every commit with 'git commit -s'."
+            echo "See CONTRIBUTING.md for details."
+            exit 1
+          fi
+          echo "All commits are signed off."
