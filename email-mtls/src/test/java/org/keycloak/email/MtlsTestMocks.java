@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.nokia.keycloak.email.mtls;
+package org.keycloak.email;
 
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.security.KeyStore;
-
+import java.util.Map;
 import org.keycloak.Config;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
@@ -28,20 +28,27 @@ import org.keycloak.truststore.TruststoreProvider;
 import org.keycloak.truststore.TruststoreProviderFactory;
 
 /**
- * Lightweight Mockito stubs shared by the test classes. Keycloak itself uses Mockito,
- * so this stays within the "tools Keycloak uses" testing constraint.
+ * Lightweight Mockito stubs shared by the test classes. Keycloak itself uses Mockito, so this stays
+ * within the "tools Keycloak uses" testing constraint.
  */
 public final class MtlsTestMocks {
 
-    private MtlsTestMocks() {
+    private MtlsTestMocks() {}
+
+    /** Returns a map of email authenticators initialized from the default provider factory. */
+    public static Map<EmailAuthenticator.AuthenticatorType, EmailAuthenticator>
+            emailAuthenticators() {
+        DefaultEmailSenderProviderFactory factory = new DefaultEmailSenderProviderFactory();
+        factory.init(mock(Config.Scope.class));
+        return factory.getEmailAuthenticators();
     }
 
-    /** A {@link Config.Scope} returning the given mTLS keystore options (any may be null). */
-    public static Config.Scope configScope(String keyStore, String password, String type) {
+    /** A {@link Config.Scope} returning the given mTLS keystore options */
+    public static Config.Scope keycloakConfigScope(String keyStore, String password, String type) {
         Config.Scope scope = mock(Config.Scope.class);
-        when(scope.get(MtlsClientKeystore.CONFIG_KEY_STORE)).thenReturn(keyStore);
-        when(scope.get(MtlsClientKeystore.CONFIG_KEY_STORE_PASSWORD)).thenReturn(password);
-        when(scope.get(MtlsClientKeystore.CONFIG_KEY_STORE_TYPE)).thenReturn(type);
+        when(scope.get(MtlsKeystore.CONFIG_KEY_STORE)).thenReturn(keyStore);
+        when(scope.get(MtlsKeystore.CONFIG_KEY_STORE_PASSWORD)).thenReturn(password);
+        when(scope.get(MtlsKeystore.CONFIG_KEY_STORE_TYPE)).thenReturn(type);
         return scope;
     }
 

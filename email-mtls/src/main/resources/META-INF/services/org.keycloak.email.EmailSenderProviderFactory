@@ -1,1 +1,1 @@
-com.nokia.keycloak.email.mtls.MtlsEmailSenderProviderFactory
+org.keycloak.email.MtlsEmailSenderProviderFactory

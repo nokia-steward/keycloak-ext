@@ -26,6 +26,7 @@ Every commit must be signed off (git commit -s) to satisfy the DCO check.
 - [ ] I ran `./mvnw verify` in the affected extension and it passes.
 - [ ] I added or updated tests for my change.
 - [ ] I updated the relevant `CHANGELOG.md` and documentation.
+- [ ] I disclosed AI agent usage in the PR description, if applicable.
 - [ ] I did not commit any secrets (passwords, real keystores, credentials).
 
 ## Related issues

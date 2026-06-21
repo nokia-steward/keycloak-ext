@@ -1,0 +1,38 @@
+# Applies an `ext:<name>` label based on the "Extension" dropdown in the issue forms.
+# The dropdown value must be a slug (e.g. email-mtls) to be labeled; values with
+# spaces (e.g. "repository-wide / shared files") are ignored. The label is created
+# automatically if it does not exist yet.
+name: Issue labeler
+
+on:
+  issues:
+    types: [opened, edited]
+
+permissions:
+  issues: write
+
+jobs:
+  label:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const body = context.payload.issue.body || '';
+            const m = body.match(/###\s*Extension\s*\r?\n+\s*([^\r\n]+)/);
+            if (!m) return;
+            const value = m[1].trim();
+            if (!/^[a-z0-9][a-z0-9-]+$/.test(value)) {
+              core.info(`Extension value "${value}" is not a slug; skipping.`);
+              return;
+            }
+            const label = `ext:${value}`;
+            const { owner, repo } = context.repo;
+            const issue_number = context.payload.issue.number;
+            try {
+              await github.rest.issues.addLabels({ owner, repo, issue_number, labels: [label] });
+            } catch (e) {
+              await github.rest.issues.createLabel({ owner, repo, name: label, color: '1d76db' })
+                .catch(() => {});
+              await github.rest.issues.addLabels({ owner, repo, issue_number, labels: [label] });
+            }

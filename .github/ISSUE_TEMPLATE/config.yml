@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Report a security vulnerability
+    url: https://github.com/nokia/keycloak-ext/security/advisories/new
+    about: Do not open a public issue for security problems. Report privately through GitHub security advisories.
+  - name: Question or discussion
+    url: https://github.com/nokia/keycloak-ext/discussions
+    about: For usage questions and general discussion (if Discussions is enabled).

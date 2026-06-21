@@ -27,6 +27,9 @@ Thumbs.db
 *.log
 *.tmp
 
+# Local planning / scratch docs (not for publishing)
+docs/
+
 # Local secrets / keystores (never commit real keystores or passwords)
 *.p12
 *.pfx

@@ -21,14 +21,14 @@
 
     <groupId>com.nokia.keycloak</groupId>
     <artifactId>keycloak-email-mtls</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>${revision}</version>
     <packaging>jar</packaging>
 
     <name>Keycloak Email Provider with mTLS</name>
     <description>
         Keycloak EmailSenderProvider that behaves exactly like the built-in
-        DefaultEmailSenderProvider, but adds optional mutual TLS (client
-        certificate) support for the SMTP connection.
+        DefaultEmailSenderProvider, but adds optional mutual TLS support (Keycloak side keystore)
+        for the SMTP connection.
     </description>
     <url>https://github.com/nokia/keycloak-ext</url>
 
@@ -52,83 +52,51 @@
     </scm>
 
     <properties>
+        <!--
+          Versioning scheme: the artifact version is <keycloak.version>-<release.number>,
+          so the version encodes the Keycloak release this build targets.
+
+          On each release, bump these two properties together:
+            - keycloak.version: the Keycloak version this build compiles and is tested against.
+            - release.number:   an integer, incremented for repeated releases against the SAME
+                                 keycloak.version; reset to 1 whenever keycloak.version changes.
+
+          Examples: 26.6.3-1, 26.6.3-2 (second release for 26.6.3), 26.7.1-1 (first for 26.7.1).
+          This build produces a JAR file with the name keycloak-email-mtls-<version>.jar
+          (e.g. keycloak-email-mtls-26.6.3-1.jar).
+        -->
+        <keycloak.version>26.6.3</keycloak.version>
+        <release.number>1</release.number>
+        <revision>${keycloak.version}-${release.number}</revision>
+
+        <maven.compiler.release>17</maven.compiler.release>
+
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <!-- Compile to Java 17 bytecode for broad Keycloak compatibility. -->
-        <maven.compiler.release>17</maven.compiler.release>
-
-        <!-- Pinned target Keycloak version. See README compatibility matrix. -->
-        <keycloak.version>26.6.3</keycloak.version>
-
-        <!-- Provided (Keycloak already ships these at runtime). -->
-        <jakarta.mail-api.version>2.1.3</jakarta.mail-api.version>
-
         <!-- Test-only dependency versions. -->
         <junit.version>4.13.2</junit.version>
-        <hamcrest.version>2.2</hamcrest.version>
-        <mockito.version>5.12.0</mockito.version>
-        <greenmail.version>2.1.3</greenmail.version>
-        <angus-mail.version>2.0.3</angus-mail.version>
-        <bouncycastle.version>1.78.1</bouncycastle.version>
-        <testcontainers.version>1.19.8</testcontainers.version>
+        <mockito.version>5.23.0</mockito.version>
+        <greenmail.version>2.1.9</greenmail.version>
+        <bouncycastle.version>1.84</bouncycastle.version>
+        <testcontainers.version>2.0.5</testcontainers.version>
 
         <!-- Plugin versions. -->
-        <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
-        <maven-surefire-plugin.version>3.2.5</maven-surefire-plugin.version>
-        <maven-failsafe-plugin.version>3.2.5</maven-failsafe-plugin.version>
-        <maven-jar-plugin.version>3.4.1</maven-jar-plugin.version>
-        <build-helper-maven-plugin.version>3.6.0</build-helper-maven-plugin.version>
+        <maven-compiler-plugin.version>3.15.0</maven-compiler-plugin.version>
+        <maven-surefire-plugin.version>3.5.6</maven-surefire-plugin.version>
+        <maven-failsafe-plugin.version>3.5.6</maven-failsafe-plugin.version>
+        <maven-jar-plugin.version>3.5.0</maven-jar-plugin.version>
+        <build-helper-maven-plugin.version>3.6.1</build-helper-maven-plugin.version>
+        <spotless-maven-plugin.version>3.7.0</spotless-maven-plugin.version>
     </properties>
 
     <dependencies>
-        <!--
-          Keycloak SPI / services. All 'provided': the running Keycloak server
-          supplies these, so they are never bundled into the released JAR.
-          This keeps runtime dependencies at zero (requirements section 6).
-        -->
-        <dependency>
-            <groupId>org.keycloak</groupId>
-            <artifactId>keycloak-core</artifactId>
-            <version>${keycloak.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.keycloak</groupId>
-            <artifactId>keycloak-common</artifactId>
-            <version>${keycloak.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.keycloak</groupId>
-            <artifactId>keycloak-server-spi</artifactId>
-            <version>${keycloak.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.keycloak</groupId>
-            <artifactId>keycloak-server-spi-private</artifactId>
-            <version>${keycloak.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <!-- DefaultEmailSenderProvider, EmailAuthenticator, JSSETruststoreConfigurator. -->
         <dependency>
             <groupId>org.keycloak</groupId>
             <artifactId>keycloak-services</artifactId>
             <version>${keycloak.version}</version>
             <scope>provided</scope>
         </dependency>
-
-        <!-- Jakarta Mail API (provided by Keycloak at runtime). -->
-        <dependency>
-            <groupId>jakarta.mail</groupId>
-            <artifactId>jakarta.mail-api</artifactId>
-            <version>${jakarta.mail-api.version}</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <!-- ===================== Test dependencies ===================== -->
-
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -136,19 +104,11 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.hamcrest</groupId>
-            <artifactId>hamcrest</artifactId>
-            <version>${hamcrest.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <!-- Mockito is used by Keycloak; here only to stub KeycloakSession/TruststoreProvider. -->
-        <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
             <version>${mockito.version}</version>
             <scope>test</scope>
         </dependency>
-        <!-- In-memory SMTP server used by Keycloak's own email tests. -->
         <dependency>
             <groupId>com.icegreen</groupId>
             <artifactId>greenmail</artifactId>
@@ -161,14 +121,6 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <!-- Jakarta Mail implementation needed at test runtime (SMTP transport). -->
-        <dependency>
-            <groupId>org.eclipse.angus</groupId>
-            <artifactId>angus-mail</artifactId>
-            <version>${angus-mail.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <!-- Generate PKCS12/JKS/BCFKS keystores and X.509 certs in tests. -->
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcpkix-jdk18on</artifactId>
@@ -194,7 +146,6 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${maven-surefire-plugin.version}</version>
                 <configuration>
-                    <!-- Unit + parity + mTLS handshake tests. IT classes (*IT) run via failsafe in the 'it' profile. -->
                     <includes>
                         <include>**/*Test.java</include>
                     </includes>
@@ -216,14 +167,54 @@
                     </archive>
                 </configuration>
             </plugin>
+
+            <plugin>
+                <groupId>com.diffplug.spotless</groupId>
+                <artifactId>spotless-maven-plugin</artifactId>
+                <version>${spotless-maven-plugin.version}</version>
+                <configuration>
+                    <formats>
+                        <format>
+                            <includes>
+                                <include>pom.xml</include>
+                                <include>src/**/*.xml</include>
+                                <include>**/*.md</include>
+                            </includes>
+                            <trimTrailingWhitespace/>
+                            <endWithNewline/>
+                        </format>
+                    </formats>
+                    <java>
+                        <includes>
+                            <include>src/main/java/**/*.java</include>
+                            <include>src/test/java/**/*.java</include>
+                            <include>src/test/integration_tests/java/**/*.java</include>
+                        </includes>
+                        <trimTrailingWhitespace/>
+                        <endWithNewline/>
+                        <googleJavaFormat>
+                            <style>AOSP</style>
+                        </googleJavaFormat>
+                        <removeUnusedImports/>
+                    </java>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>spotless-check</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 
     <profiles>
         <!--
-          Best-effort integration test (requires Docker). Run with: ./mvnw verify -Pit
-          Starts a Keycloak container with this provider JAR to validate that the
-          split-package provider class loads and the 'email-mtls' provider is selectable.
+          Integration test profile. Run with: ./mvnw verify -Pit.
+          Need docker installed and running to run the tests.
         -->
         <profile>
             <id>it</id>
@@ -251,8 +242,22 @@
                                 </goals>
                                 <configuration>
                                     <sources>
-                                        <source>src/it/java</source>
+                                        <source>src/test/integration_tests/java</source>
                                     </sources>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>add-integration-test-resources</id>
+                                <phase>generate-test-resources</phase>
+                                <goals>
+                                    <goal>add-test-resource</goal>
+                                </goals>
+                                <configuration>
+                                    <resources>
+                                        <resource>
+                                            <directory>src/test/integration_tests/resources</directory>
+                                        </resource>
+                                    </resources>
                                 </configuration>
                             </execution>
                         </executions>
@@ -265,6 +270,9 @@
                             <includes>
                                 <include>**/*IT.java</include>
                             </includes>
+                            <systemPropertyVariables>
+                                <keycloak.version>${keycloak.version}</keycloak.version>
+                            </systemPropertyVariables>
                         </configuration>
                         <executions>
                             <execution>

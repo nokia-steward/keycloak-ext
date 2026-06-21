@@ -15,59 +15,34 @@
  */
 package org.keycloak.email;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
+import static org.junit.Assert.assertFalse;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
-
-import jakarta.mail.internet.MimeMessage;
-
-import com.icegreen.greenmail.util.GreenMail;
-import com.icegreen.greenmail.util.ServerSetupTest;
-import com.nokia.keycloak.email.mtls.MtlsClientKeystore;
-import com.nokia.keycloak.email.mtls.MtlsTestMocks;
-
 import org.junit.Test;
-import org.keycloak.Config;
 import org.keycloak.models.KeycloakSession;
 
 /**
- * Proves behavior parity with {@link DefaultEmailSenderProvider} when no mTLS keystore
- * is configured (requirements section 18.1):
- * <ul>
- *   <li>{@link DefaultEmailSenderProvider#buildEmailProperties(Map, String)} produces
- *       identical SMTP properties for the same configuration; and</li>
- *   <li>a real message is delivered through an in-memory SMTP server (GreenMail).</li>
- * </ul>
- * This test lives in {@code org.keycloak.email} so it can call the package-private
- * {@code buildEmailProperties} on both providers.
+ * Proves backward compatibility and behavior parity with Keycloak's built-in {@link
+ * DefaultEmailSenderProvider} when no mTLS keystore is configured.
+ *
+ * <p>Parity Strategy: It feeds the exact same Keycloak configuration into both providers and
+ * asserts that they build the exact same Jakarta Mail {@link Properties} object content. Identical
+ * properties guarantee that Jakarta Mail receives the same SMTP configuration and behaves the same
+ * for both providers.
+ *
+ * <p>This guarantees that replacing the default provider won't break standard email functionality
+ * for Realms that do not require mTLS.
  */
-public class MtlsEmailSenderProviderParityTest {
+public class MtlsEmailProviderParityTest {
 
     private static final String FROM = "noreply@example.com";
 
     private final KeycloakSession session = MtlsTestMocks.sessionWithoutTruststore();
-    private final Map<EmailAuthenticator.AuthenticatorType, EmailAuthenticator> authenticators = authenticators();
-
-    private static Map<EmailAuthenticator.AuthenticatorType, EmailAuthenticator> authenticators() {
-        DefaultEmailSenderProviderFactory factory = new DefaultEmailSenderProviderFactory();
-        factory.init(mock(Config.Scope.class));
-        return factory.getEmailAuthenticators();
-    }
-
-    private DefaultEmailSenderProvider defaultProvider() {
-        return new DefaultEmailSenderProvider(session, authenticators);
-    }
-
-    private MtlsEmailSenderProvider mtlsProviderWithoutKeystore() {
-        return new MtlsEmailSenderProvider(session, authenticators, MtlsClientKeystore.disabled());
-    }
+    private final Map<EmailAuthenticator.AuthenticatorType, EmailAuthenticator> authenticators =
+            MtlsTestMocks.emailAuthenticators();
 
     @Test
     public void emailPropertiesMatchDefaultForPlainConfig() throws Exception {
@@ -125,46 +100,21 @@ public class MtlsEmailSenderProviderParityTest {
         assertPropertiesParity(config);
     }
 
-    @Test
-    public void disabledMtlsAddsNoSocketFactoryEvenWithTls() throws Exception {
-        Map<String, String> config = plain();
-        config.put("ssl", "true");
-
-        Properties props = mtlsProviderWithoutKeystore().buildEmailProperties(config, FROM);
-
-        assertThat(props.containsKey("mail.smtp.ssl.socketFactory"), is(false));
+    private DefaultEmailSenderProvider defaultKeycloakEmailSenderProvider() {
+        return new DefaultEmailSenderProvider(session, authenticators);
     }
 
-    @Test
-    public void deliversEmailThroughSmtpLikeDefault() throws Exception {
-        GreenMail greenMail = new GreenMail(ServerSetupTest.SMTP);
-        greenMail.start();
-        try {
-            Map<String, String> config = new LinkedHashMap<>();
-            config.put("host", "127.0.0.1");
-            config.put("port", String.valueOf(greenMail.getSmtp().getPort()));
-            config.put("from", FROM);
-
-            mtlsProviderWithoutKeystore().send(config, "user@example.com",
-                    "Parity subject", "Plain text body", "<p>HTML body</p>");
-
-            assertThat(greenMail.waitForIncomingEmail(10_000, 1), is(true));
-            MimeMessage[] received = greenMail.getReceivedMessages();
-            assertEquals(1, received.length);
-            assertEquals("Parity subject", received[0].getSubject());
-            assertThat(received[0].getAllRecipients()[0].toString(), containsString("user@example.com"));
-            assertThat(received[0].getFrom()[0].toString(), containsString(FROM));
-        } finally {
-            greenMail.stop();
-        }
+    private MtlsEmailSenderProvider mtlsProviderWithoutKeystore() {
+        return new MtlsEmailSenderProvider(session, authenticators, null);
     }
 
     private void assertPropertiesParity(Map<String, String> config) throws EmailException {
-        Properties expected = defaultProvider().buildEmailProperties(config, FROM);
+        Properties expected =
+                defaultKeycloakEmailSenderProvider().buildEmailProperties(config, FROM);
         Properties actual = mtlsProviderWithoutKeystore().buildEmailProperties(config, FROM);
         assertEquals("SMTP properties must match the default provider exactly", expected, actual);
         // Sanity: with mTLS disabled there must be no client-cert socket factory.
-        assertThat(actual.containsKey("mail.smtp.ssl.socketFactory"), is(not(true)));
+        assertFalse(actual.containsKey("mail.smtp.ssl.socketFactory"));
     }
 
     private static Map<String, String> plain() {

@@ -1,3 +1,7 @@
+# Publishes a GitHub Release for the email-mtls extension.
+# The version is derived from the tag: email-mtls/v<keycloak.version>-<release.number>
+# (e.g. email-mtls/v26.6.3-1) -> version 26.6.3-1 -> JAR keycloak-email-mtls-26.6.3-1.jar.
+# Keep email-mtls/pom.xml (keycloak.version + release.number) in sync with the tag.
 name: email-mtls Release
 
 on:
@@ -7,7 +11,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Existing tag to release (e.g. email-mtls/v1.0.0)'
+        description: 'Existing tag to release (e.g. email-mtls/v26.6.3-1)'
         required: true
 
 permissions:

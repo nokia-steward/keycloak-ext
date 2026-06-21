@@ -1,0 +1,95 @@
+name: Bug report
+description: Report a problem with an extension
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for filing a bug. Please do not paste passwords, real keystores, or other secrets.
+        For security vulnerabilities, do **not** open a public issue. Report them privately through GitHub security advisories.
+  - type: dropdown
+    id: extension
+    attributes:
+      label: Extension
+      description: Which extension does this affect? (Used to auto-apply the `ext:<name>` label.)
+      options:
+        - email-mtls
+        - repository-wide / shared files
+    validations:
+      required: true
+  - type: input
+    id: extension-version
+    attributes:
+      label: Extension version
+      description: e.g. 26.6.3-1
+      placeholder: "26.6.3-1"
+    validations:
+      required: true
+  - type: input
+    id: keycloak-version
+    attributes:
+      label: Keycloak version
+      placeholder: "26.6.3"
+    validations:
+      required: true
+  - type: input
+    id: java-version
+    attributes:
+      label: Java version
+      placeholder: "17 or 21"
+    validations:
+      required: false
+  - type: input
+    id: environment
+    attributes:
+      label: OS / container image
+      placeholder: "e.g. quay.io/keycloak/keycloak:26.6.3 on Linux"
+    validations:
+      required: false
+  - type: textarea
+    id: description
+    attributes:
+      label: Describe the bug
+      description: A clear and concise description of what the bug is.
+    validations:
+      required: true
+  - type: textarea
+    id: configuration
+    attributes:
+      label: Configuration
+      description: How is the provider configured? Do not paste passwords or secrets.
+      placeholder: |
+        - SMTP mode: STARTTLS (587) / SMTPS (465) / plain
+        - mTLS keystore type: PKCS12 / JKS / BCFKS / not configured
+        - fips-mode: strict / non-strict / off
+    validations:
+      required: false
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior / logs
+      description: Include relevant log lines with secrets redacted.
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+    validations:
+      required: false

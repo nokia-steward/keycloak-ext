@@ -1,0 +1,35 @@
+# Standard issue/PR labels for nokia/keycloak-ext.
+#
+# This file documents the labels the repository expects (referenced by the
+# issue forms, Dependabot config, and CODEOWNERS workflow). It is not applied
+# automatically unless a label-sync action is added; otherwise create these
+# labels once under Issues -> Labels (or `gh label create`).
+#
+# When adding a new extension, add a matching `ext:<extension>` label.
+
+# Per-extension labels (one per provider subfolder).
+- name: "ext:email-mtls"
+  color: "1d76db"
+  description: "Relates to the email-mtls extension"
+
+# Type labels.
+- name: "bug"
+  color: "d73a4a"
+  description: "Something isn't working"
+- name: "enhancement"
+  color: "a2eeef"
+  description: "New feature or request"
+- name: "documentation"
+  color: "0075ca"
+  description: "Documentation changes"
+- name: "question"
+  color: "d876e3"
+  description: "Further information is requested"
+
+# Automation labels.
+- name: "dependencies"
+  color: "0366d6"
+  description: "Dependency updates (Dependabot)"
+- name: "github-actions"
+  color: "000000"
+  description: "GitHub Actions / workflow updates"
