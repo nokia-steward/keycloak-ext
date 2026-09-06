@@ -82,7 +82,7 @@
         <testcontainers.version>2.0.5</testcontainers.version>
 
         <!-- Plugin versions. -->
-        <maven-compiler-plugin.version>3.15.0</maven-compiler-plugin.version>
+        <maven-compiler-plugin.version>3.16.0</maven-compiler-plugin.version>
         <maven-surefire-plugin.version>3.5.6</maven-surefire-plugin.version>
         <maven-failsafe-plugin.version>3.5.6</maven-failsafe-plugin.version>
         <maven-jar-plugin.version>3.5.0</maven-jar-plugin.version>
